@@ -46,6 +46,7 @@ load_dotenv("config.env")
 SERVER_IP = os.getenv("SERVER_IP")
 # SERVER_IP = "192.168.11.108"
 #SERVER_IP = "10.163.132.142"
+FRONTEND_URL = "https://freight-manager-ui.onrender.com"
 
 # 1. Configuration CORS
 app.add_middleware(
@@ -81,7 +82,10 @@ async def send_notification_email(email_to: str, subject: str, message_text: str
     try:
         # On crée le lien qui pointe vers ton React (port 5173 par défaut)
         # L'utilisateur cliquera dessus pour voir l'interface
-        link = f"http://{SERVER_IP}:5173/suivi/{tracking_code}"
+
+        FRONTEND_URL = "https://freight-manager-ui.onrender.com"
+        link = f"{FRONTEND_URL}/suivi/{tracking_code}"
+        
         
         full_body = f"{message_text}\n\nSuivez votre colis ici : {link}"
 
@@ -107,7 +111,7 @@ def ajouter_sms(db, numero, message, tracking_code):
     try:
         operateur = detecter_operateur(numero)
 
-        link = f"http://{SERVER_IP}:5173/suivi/{tracking_code}"
+        link = f"{FRONTEND_URL}/suivi/{tracking_code}"
         full_message = f"{message}\nSuivi: {link}"
 
         sms = models.SMSQueue(
