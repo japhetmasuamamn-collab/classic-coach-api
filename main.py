@@ -248,7 +248,9 @@ async def enregistrer_colis(
             liste_items_enregistres.append({
                 "sub_tracking_code": sub_tracking_code,
                 "nature": nouvelle_piece.nature_contenu,
-                "qr_url_item": f"http://{SERVER_IP}:8000/static/qrcodes/{qr_sub_filename}"
+                BASE_URL = "https://classic-coach-api.onrender.com"
+
+                qr_url_item = f"{BASE_URL}/static/qrcodes/{qr_sub_filename}"
             })
             
         db.commit()
