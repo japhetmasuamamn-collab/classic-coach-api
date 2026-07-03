@@ -311,7 +311,9 @@ async def enregistrer_colis(
         "status": "success",
         "id": nouveau_colis_maitre.id,
         "code_recu": tracking_code_principal,
-        "qr_url_recu": f"http://{SERVER_IP}:8000/static/qrcodes/{qr_filename_principal}",
+        BASE_URL = "https://classic-coach-api.onrender.com"
+
+        "qr_url_recu": f"{BASE_URL}/static/qrcodes/{qr_filename_principal}"
         "nombre_total_pieces": total_pieces,
         "colis_details": liste_items_enregistres
     }
