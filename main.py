@@ -43,7 +43,7 @@ app = FastAPI(title="Classic Coach API")
 
 load_dotenv("config.env")
 
-SERVER_IP = os.getenv("SERVER_IP")
+BASE_URL = os.getenv("BASE_URL")
 # SERVER_IP = "192.168.11.108"
 #SERVER_IP = "10.163.132.142"
 FRONTEND_URL = "https://freight-manager-ui.onrender.com"
@@ -252,9 +252,7 @@ async def enregistrer_colis(
             liste_items_enregistres.append({
                 "sub_tracking_code": sub_tracking_code,
                 "nature": nouvelle_piece.nature_contenu,
-                BASE_URL = "https://classic-coach-api.onrender.com"
-
-                qr_url_item = f"{BASE_URL}/static/qrcodes/{qr_sub_filename}"
+                "qr_url_item": f"{BASE_URL}/static/qrcodes/{qr_sub_filename}"
             })
             
         db.commit()
@@ -315,9 +313,7 @@ async def enregistrer_colis(
         "status": "success",
         "id": nouveau_colis_maitre.id,
         "code_recu": tracking_code_principal,
-        BASE_URL = "https://classic-coach-api.onrender.com"
-
-        "qr_url_recu": f"{BASE_URL}/static/qrcodes/{qr_filename_principal}"
+        "qr_url_recu": f"{BASE_URL}/static/qrcodes/{qr_filename_principal}",
         "nombre_total_pieces": total_pieces,
         "colis_details": liste_items_enregistres
     }
