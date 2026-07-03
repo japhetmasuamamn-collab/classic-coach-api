@@ -36,6 +36,9 @@ RDC_TIMEZONE = ZoneInfo("Africa/Lubumbashi")
 # Dans main.py, après les imports
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+
+print("===== MAIN DEMARRE =====")
+
 app = FastAPI(title="Classic Coach API")
 
 load_dotenv("config.env")
@@ -67,6 +70,8 @@ if not os.path.exists("static/qrcodes"):
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # 3. Création des tables
+print("===== CREATION DES TABLES =====")
+print("===== TABLES CREEES =====")
 models.Base.metadata.create_all(bind=database.engine)
 
 
