@@ -78,22 +78,29 @@ models.Base.metadata.create_all(bind=database.engine)
 
 
 # --- FONCTION D'ENVOI D'EMAIL ---
+# --- FONCTION D'ENVOI D'EMAIL ---
 async def send_notification_email(email_to: str, subject: str, message_text: str, tracking_code: str):
-    # 🕵️ ÉTAPE 3 : Vérifier que Render exécute bien la fonction
     print("\n" + "="*40)
     print(f"=== [DÉBUT] Appel de send_notification_email vers : {email_to} ===")
     print("="*40)
 
     try:
-        # 🕵️ ÉTAPE 1 : Vérifier que Render lit correctement tes variables d'environnement
+        smtp_host = os.getenv("SMTP_HOST", "smtp.gmail.com")
+        smtp_port = int(os.getenv("SMTP_PORT", 465)) # Par défaut 465 maintenant
+        
+        # Détection automatique de la configuration TLS/SSL selon le port
+        # Port 465 = use_tls=True (SSL direct) | Port 587 = start_tls=True
+        use_ssl = (smtp_port == 465)
+        use_start_tls = (smtp_port == 587)
+
         print("--- VERIFICATION DES VARIABLES SMTP IN PROD ---")
-        print("SMTP_HOST lu :", os.getenv("SMTP_HOST"))
-        print("SMTP_PORT lu :", os.getenv("SMTP_PORT"))
+        print("SMTP_HOST lu :", smtp_host)
+        print("SMTP_PORT lu :", smtp_port)
         print("SMTP_USER lu :", os.getenv("SMTP_USER"))
         print("SMTP_PASSWORD PRESENT :", bool(os.getenv("SMTP_PASSWORD")))
+        print(f"CONFIGURATION : Mode SSL Direct={use_ssl}, Mode STARTTLS={use_start_tls}")
         print("-" * 47)
 
-        # Construction du lien et du message
         FRONTEND_URL = "https://freight-manager-ui.onrender.com"
         link = f"{FRONTEND_URL}/suivi/{tracking_code}"
         full_body = f"{message_text}\n\nSuivez votre colis ici : {link}"
@@ -104,21 +111,22 @@ async def send_notification_email(email_to: str, subject: str, message_text: str
         message["Subject"] = subject
         message.set_content(full_body)
 
-        # Tentative d'envoi
         print("🚀 Tentative d'envoi via aiosmtplib...")
+        
+        # Ajout d'un timeout de 15 secondes pour éviter que le code ne se fige indéfiniment
         await aiosmtplib.send(
             message,
-            hostname=os.getenv("SMTP_HOST", "smtp.gmail.com"),
-            port=int(os.getenv("SMTP_PORT", 587)),
+            hostname=smtp_host,
+            port=smtp_port,
             username=os.getenv("SMTP_USER"),
             password=os.getenv("SMTP_PASSWORD"),
-            use_tls=False,
-            start_tls=True,
+            use_tls=use_ssl,
+            start_tls=use_start_tls,
+            timeout=15 
         )
         print(f"✅ Email envoyé avec succès à {email_to}")
 
     except Exception as e:
-        # 🕵️ ÉTAPE 2 : Capture et affichage de l'erreur brute (SSL, Auth, Network...)
         print(f"❌ [ERREUR SMTP CRITIQUE] L'envoi a échoué. Détails : {repr(e)}")
         
     finally:
