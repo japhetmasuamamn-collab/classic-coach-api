@@ -79,14 +79,23 @@ models.Base.metadata.create_all(bind=database.engine)
 
 # --- FONCTION D'ENVOI D'EMAIL ---
 async def send_notification_email(email_to: str, subject: str, message_text: str, tracking_code: str):
-    try:
-        # On crée le lien qui pointe vers ton React (port 5173 par défaut)
-        # L'utilisateur cliquera dessus pour voir l'interface
+    # 🕵️ ÉTAPE 3 : Vérifier que Render exécute bien la fonction
+    print("\n" + "="*40)
+    print(f"=== [DÉBUT] Appel de send_notification_email vers : {email_to} ===")
+    print("="*40)
 
+    try:
+        # 🕵️ ÉTAPE 1 : Vérifier que Render lit correctement tes variables d'environnement
+        print("--- VERIFICATION DES VARIABLES SMTP IN PROD ---")
+        print("SMTP_HOST lu :", os.getenv("SMTP_HOST"))
+        print("SMTP_PORT lu :", os.getenv("SMTP_PORT"))
+        print("SMTP_USER lu :", os.getenv("SMTP_USER"))
+        print("SMTP_PASSWORD PRESENT :", bool(os.getenv("SMTP_PASSWORD")))
+        print("-" * 47)
+
+        # Construction du lien et du message
         FRONTEND_URL = "https://freight-manager-ui.onrender.com"
         link = f"{FRONTEND_URL}/suivi/{tracking_code}"
-        
-        
         full_body = f"{message_text}\n\nSuivez votre colis ici : {link}"
 
         message = EmailMessage()
@@ -95,6 +104,8 @@ async def send_notification_email(email_to: str, subject: str, message_text: str
         message["Subject"] = subject
         message.set_content(full_body)
 
+        # Tentative d'envoi
+        print("🚀 Tentative d'envoi via aiosmtplib...")
         await aiosmtplib.send(
             message,
             hostname=os.getenv("SMTP_HOST", "smtp.gmail.com"),
@@ -104,8 +115,14 @@ async def send_notification_email(email_to: str, subject: str, message_text: str
             use_tls=False,
             start_tls=True,
         )
+        print(f"✅ Email envoyé avec succès à {email_to}")
+
     except Exception as e:
-        print(f"Erreur email: {e}")
+        # 🕵️ ÉTAPE 2 : Capture et affichage de l'erreur brute (SSL, Auth, Network...)
+        print(f"❌ [ERREUR SMTP CRITIQUE] L'envoi a échoué. Détails : {repr(e)}")
+        
+    finally:
+        print(f"=== [FIN] Traitement send_notification_email pour {email_to} ===\n")
 
 def ajouter_sms(db, numero, message, tracking_code):
     try:
